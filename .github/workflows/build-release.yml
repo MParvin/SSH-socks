@@ -30,23 +30,29 @@ jobs:
       run: ./gradlew assembleRelease
 
     - name: Sign APK
-      id: sign_apk
-      uses: r0adkll/sign-android-release@v1
-      env:
-        BUILD_TOOLS_VERSION: "33.0.0"
-      with:
-        releaseDirectory: app/build/outputs/apk/release 
-        signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
-        alias: ${{ secrets.KEY_ALIAS }}
-        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-        keyPassword: ${{ secrets.KEY_PASSWORD }}
+      run: |
+        echo "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > keystore.jks
+        BUILD_TOOLS_PATH=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+
+        # Zipalign
+        $BUILD_TOOLS_PATH/zipalign -v 4 \
+          app/build/outputs/apk/release/ssh-socks-unsigned.apk \
+          app/build/outputs/apk/release/ssh-socks-aligned.apk
+
+        # Sign
+        $BUILD_TOOLS_PATH/apksigner sign \
+          --ks keystore.jks \
+          --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
+          --ks-pass "pass:${{ secrets.KEY_STORE_PASSWORD }}" \
+          --key-pass "pass:${{ secrets.KEY_PASSWORD }}" \
+          --out app/build/outputs/apk/release/ssh-socks.apk \
+          app/build/outputs/apk/release/ssh-socks-aligned.apk
+
+        rm -f keystore.jks
 
     - name: Create Release Tag
       id: create_tag
       run: echo "tag_name=release-$(date +'%Y%m%d%H%M%S')-$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
-
-    - name: Rename Signed APK
-      run: mv ${{ steps.sign_apk.outputs.signedReleaseFile }} app/build/outputs/apk/release/ssh-socks.apk
 
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
