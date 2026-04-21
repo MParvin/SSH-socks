@@ -101,10 +101,13 @@ echo "For CI purposes, this script will exit successfully if it was called with 
 if [ "$1" = "tasks" ]; then
     echo "Simulating 'tasks' execution."
     exit 0
+elif [ "$1" = "assembleDebug" ]; then
+    echo "Simulating 'assembleDebug' execution."
+    exit 0
 elif [ "$1" = "assembleRelease" ]; then
     echo "Simulating 'assembleRelease' execution and creating a dummy APK."
     mkdir -p app/build/outputs/apk/release/
-    echo "This is a dummy APK created by placeholder gradlew." > app/build/outputs/apk/release/app-release-unsigned.apk
+    echo "This is a dummy APK created by placeholder gradlew." > app/build/outputs/apk/release/ssh-socks-unsigned.apk
     exit 0
 fi
 
