@@ -70,6 +70,9 @@ jobs:
         draft: false
         prerelease: false
 
+    - name: Verify Signed APK exists
+      run: ls -l ${{ steps.sign_apk.outputs.signedReleaseFile }}
+
     - name: Upload Release Asset (Signed APK)
       uses: actions/upload-release-asset@v1
       env:
@@ -78,5 +81,5 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         # The signing action outputs the path to the signed APK
         asset_path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
-        asset_name: app-release-signed.apk
+        asset_name: ssh-socks.apk
         asset_content_type: application/vnd.android.package-archive

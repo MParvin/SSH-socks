@@ -35,7 +35,7 @@ if /I "%CMD_ARG1%" == "tasks" (
 ) else if /I "%CMD_ARG1%" == "assembleRelease" (
     echo Simulating 'assembleRelease' execution and creating a dummy APK.
     if not exist "app\build\outputs\apk\release" md "app\build\outputs\apk\release"
-    echo This is a dummy APK created by placeholder gradlew.bat > app\build\outputs\apk\release\app-release-unsigned.apk
+    echo This is a dummy APK created by placeholder gradlew.bat > app\build\outputs\apk\release\ssh-socks-unsigned.apk
     exit /B 0
 )
 
