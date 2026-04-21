@@ -10,7 +10,7 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     env:
-      BUILD_TOOLS_VERSION: '33.0.2'
+      BUILD_TOOLS_VERSION: '34.0.0'
       ANDROID_HOME: '/usr/local/lib/android/sdk'
       ANDROID_SDK_ROOT: '/usr/local/lib/android/sdk'
     steps:
@@ -23,6 +23,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
+
+    - name: Debug Android SDK
+      run: |
+        ls -d /usr/local/lib/android/sdk/build-tools/* || echo "No build-tools found"
 
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
