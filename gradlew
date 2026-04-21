@@ -107,7 +107,7 @@ elif [ "$1" = "assembleDebug" ]; then
 elif [ "$1" = "assembleRelease" ]; then
     echo "Simulating 'assembleRelease' execution and creating a dummy APK."
     mkdir -p app/build/outputs/apk/release/
-    echo "This is a dummy APK created by placeholder gradlew." > app/build/outputs/apk/release/ssh-socks-unsigned.apk
+    zip -j app/build/outputs/apk/release/ssh-socks-unsigned.apk LICENSE
     exit 0
 fi
 
