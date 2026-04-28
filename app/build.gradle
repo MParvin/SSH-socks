@@ -1,17 +1,17 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
-    id 'kotlin-kapt' // Should already be there from Room setup
-    id 'androidx.navigation.safeargs.kotlin' // Add Safe Args plugin
+    id 'kotlin-kapt'
+    id 'androidx.navigation.safeargs.kotlin'
 }
 
 android {
-    // ... existing configurations ...
+    namespace 'com.example.sshinjector'
     compileSdk 33
 
     defaultConfig {
         applicationId "com.example.sshinjector"
-        minSdk 26
+        minSdk 21
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -24,6 +24,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            if (variant.buildType.name == 'release') {
+                outputFileName = "ssh-socks-unsigned.apk"
+            }
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -31,10 +40,17 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
-    namespace 'com.example.sshinjector'
 
     buildFeatures {
-        viewBinding true  // Enable ViewBinding
+        viewBinding true
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            if (variant.buildType.name == "release") {
+                output.outputFileName = "ssh-socks-unsigned.apk"
+            }
+        }
     }
 }
 
@@ -42,20 +58,16 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.10.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4' // Can be removed if not directly used by new layouts
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
-    // Room components (should already be there)
-    def room_version = "2.5.0" // Check for latest version
+    def room_version = "2.5.0"
     implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
-    // To use Kotlin Symbol Processing (KSP) for Room, if preferred over kapt
-    // ksp "androidx.room:room-compiler:$room_version"
-    implementation "androidx.room:room-ktx:$room_version" // Kotlin Extensions and Coroutines support for Room
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.6.2" // For LiveData
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2" // For by viewModels/navGraphViewModels
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-ktx:$room_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.6.2"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2"
 
-    // Navigation Components
-    def nav_version = "2.5.3" // Use a recent stable version (check latest if building new)
+    def nav_version = "2.5.3"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 

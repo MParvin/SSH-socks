@@ -7,7 +7,7 @@
     <string name="delete_profile_desc">Delete Profile</string>
 
     <!-- For fragment_profile_list.xml -->
-    <string name="no_profiles_yet_add_one">No SSH profiles yet. Tap '+' to add one.</string>
+    <string name="no_profiles_yet_add_one">No SSH profiles yet. Tap + to add one.</string>
     <string name="add_new_profile">Add new SSH profile</string>
 
     <!-- For dialog_add_edit_profile.xml -->
