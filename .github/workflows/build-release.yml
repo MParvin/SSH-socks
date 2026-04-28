@@ -56,7 +56,7 @@ jobs:
       run: ls -R app/build/outputs/apk/release/
 
     - name: Sign APK
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.HAS_SIGNING_SECRET == 'true'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SIGNING_KEY_STORE_BASE64 != ''
       id: sign_apk
       uses: r0adkll/sign-android-release@v1
       with:
@@ -67,7 +67,7 @@ jobs:
         keyPassword: ${{ secrets.KEY_PASSWORD }}
 
     - name: Create Release Tag
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && env.HAS_SIGNING_SECRET == 'true'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SIGNING_KEY_STORE_BASE64 != ''
       id: create_tag
       run: echo "tag_name=release-$(date +'%Y%m%d%H%M%S')-$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
 
