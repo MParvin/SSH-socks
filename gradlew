@@ -212,7 +212,7 @@ elif [ "$1" = "assembleDebug" ]; then
 elif [ "$1" = "assembleRelease" ]; then
     echo "Simulating 'assembleRelease' execution and creating a dummy APK."
     mkdir -p app/build/outputs/apk/release/
-    zip -j app/build/outputs/apk/release/ssh-socks-unsigned.apk LICENSE
+    rm -rf app/build/outputs/apk/release/* && zip -j app/build/outputs/apk/release/ssh-socks-unsigned.apk LICENSE
     exit 0
 fi
 
