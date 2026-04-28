@@ -1,6 +1,7 @@
 # Built outputs
 /build/
 app/build/
+/release/
 
 # Gradle
 .gradle/
