@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -40,6 +43,32 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew assembleRelease
 
+    - name: List build directory
+      run: ls -R app/build/outputs/apk/release/
+
+    - name: Sign APK
+      run: |
+        echo "${{ secrets.SIGNING_KEY_STORE_BASE64 }}" | base64 --decode > keystore.jks
+        BUILD_TOOLS_PATH=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -1)
+        echo "Using build tools from $BUILD_TOOLS_PATH"
+
+        # Zipalign
+        $BUILD_TOOLS_PATH/zipalign -v 4 \
+          app/build/outputs/apk/release/ssh-socks-unsigned.apk \
+          app/build/outputs/apk/release/ssh-socks-aligned.apk
+
+        # Sign
+        $BUILD_TOOLS_PATH/apksigner sign \
+          --ks keystore.jks \
+          --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
+          --ks-pass "pass:${{ secrets.KEY_STORE_PASSWORD }}" \
+          --key-pass "pass:${{ secrets.KEY_PASSWORD }}" \
+          --out app/build/outputs/apk/release/ssh-socks.apk \
+          app/build/outputs/apk/release/ssh-socks-aligned.apk
+
+    - name: Clean up keystore
+      if: always()
+      run: rm -f keystore.jks
     - name: Sign APK (if secrets are available)
       id: sign_apk
       uses: r0adkll/sign-android-release@v1
@@ -62,11 +91,8 @@ jobs:
         name: Release ${{ steps.create_tag.outputs.tag_name }}
         body: |
           Automated release for commit ${{ github.sha }}.
-        files: |
-          ${{ steps.sign_apk.outputs.signedReleaseFile }}
+        files: app/build/outputs/apk/release/ssh-socks.apk
         draft: false
         prerelease: false
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        files: |
-          ${{ steps.sign_apk.outputs.signedReleaseFile != '' && steps.sign_apk.outputs.signedReleaseFile || 'app/build/outputs/apk/release/app-release-unsigned.apk' }}
+        GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}

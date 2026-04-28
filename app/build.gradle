@@ -36,6 +36,14 @@ android {
     buildFeatures {
         viewBinding true  // Enable ViewBinding
     }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            if (variant.buildType.name == "release") {
+                output.outputFileName = "ssh-socks-unsigned.apk"
+            }
+        }
+    }
 }
 
 dependencies {
