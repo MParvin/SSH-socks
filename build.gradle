@@ -1,12 +1,12 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
-    ext.kotlin_version = '1.7.20' // Example Kotlin version
+    ext.kotlin_version = '1.9.22' // Example Kotlin version
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.1' // Example Android Gradle Plugin version
+        classpath 'com.android.tools.build:gradle:7.4.2' // Example Android Gradle Plugin version
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         def nav_version = "2.5.3" // Ensure this matches app level
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
@@ -14,10 +14,7 @@ buildscript {
 }
 
 allprojects {
-    repositories {
-        google()
-        mavenCentral()
-    }
+    // Repositories are now configured in settings.gradle
 }
 
 task clean(type: Delete) {

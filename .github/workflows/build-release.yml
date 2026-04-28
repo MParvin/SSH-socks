@@ -12,6 +12,8 @@ permissions:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -22,6 +24,18 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
+
+    - name: Diagnostic - List Android Build Tools
+      run: |
+        echo "ANDROID_HOME: $ANDROID_HOME"
+        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+        if [ -d "$ANDROID_HOME/build-tools" ]; then
+          ls -1 "$ANDROID_HOME/build-tools"
+        elif [ -d "$ANDROID_SDK_ROOT/build-tools" ]; then
+          ls -1 "$ANDROID_SDK_ROOT/build-tools"
+        else
+          echo "Build tools directory not found in common locations."
+        fi
 
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
@@ -55,12 +69,22 @@ jobs:
     - name: Clean up keystore
       if: always()
       run: rm -f keystore.jks
+    - name: Sign APK (if secrets are available)
+      id: sign_apk
+      uses: r0adkll/sign-android-release@v1
+      continue-on-error: true
+      with:
+        releaseDirectory: app/build/outputs/apk/release 
+        signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+        alias: ${{ secrets.KEY_ALIAS }}
+        keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
+        keyPassword: ${{ secrets.KEY_PASSWORD }}
 
     - name: Create Release Tag
       id: create_tag
       run: echo "tag_name=release-$(date +'%Y%m%d%H%M%S')-$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
 
-    - name: Create GitHub Release
+    - name: Create GitHub Release and Upload Asset
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.create_tag.outputs.tag_name }}

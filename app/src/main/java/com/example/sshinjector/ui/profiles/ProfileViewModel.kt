@@ -211,6 +211,12 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         _eventMessage.value = null
     }
 
+    fun deleteProfile(profile: SSHProfile) {
+        viewModelScope.launch {
+            sshProfileDao.delete(profile)
+        }
+    }
+
     fun onSaveEventHandled() {
         _saveEvent.value = null
     }
