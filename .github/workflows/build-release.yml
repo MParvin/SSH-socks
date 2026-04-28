@@ -40,9 +40,10 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew assembleRelease
 
-    - name: Sign APK
+    - name: Sign APK (if secrets are available)
       id: sign_apk
       uses: r0adkll/sign-android-release@v1
+      continue-on-error: true
       with:
         releaseDirectory: app/build/outputs/apk/release 
         signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
@@ -67,3 +68,5 @@ jobs:
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        files: |
+          ${{ steps.sign_apk.outputs.signedReleaseFile != '' && steps.sign_apk.outputs.signedReleaseFile || 'app/build/outputs/apk/release/app-release-unsigned.apk' }}

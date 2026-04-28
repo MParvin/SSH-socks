@@ -138,7 +138,7 @@ class SshConnectionManager(private val listener: SshConnectionListener) {
     private fun startShellOutputReader() {
         outputReadingJob = sessionScope.launch(Dispatchers.IO) { // Ensure this is on an IO dispatcher
             val buffer = ByteArray(1024)
-            var bytesRead: Int
+            var bytesRead: Int = 0
             try {
                 while (isActive && internalShellOutputReader != null &&
                        (internalShellOutputReader!!.read(buffer).also { bytesRead = it }) != -1) {
