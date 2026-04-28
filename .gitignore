@@ -1,16 +1,32 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizard.settings.xml
-.DS_Store
-/build
-/app/build
-/captures
-.externalNativeBuild
-.cxx
+# Built outputs
+/build/
+app/build/
+/release/
+
+# Gradle
+.gradle/
+gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local configuration
 local.properties
+
+# Android Studio / IntelliJ IDEA
+*.iml
+.idea/
+*.iws
+*.ipr
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Keystore files (never commit signing keys)
+*.jks
+*.keystore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

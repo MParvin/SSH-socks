@@ -52,12 +52,24 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew assembleRelease
 
+    # Check if signing secrets are available (secrets cannot be used directly in `if:` expressions)
+    - name: Check signing secrets
+      id: check_signing
+      env:
+        SIGNING_KEY: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
+      run: |
+        if [ -n "$SIGNING_KEY" ]; then
+          echo "available=true" >> $GITHUB_OUTPUT
+        else
+          echo "available=false" >> $GITHUB_OUTPUT
+        fi
     - name: List build directory
       run: ls -R app/build/outputs/apk/release/
 
     - name: Sign APK
       if: github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SIGNING_KEY_STORE_BASE64 != ''
       id: sign_apk
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_signing.outputs.available == 'true'
       uses: r0adkll/sign-android-release@v1
       with:
         releaseDirectory: app/build/outputs/apk/release
@@ -69,6 +81,29 @@ jobs:
     - name: Create Release Tag
       if: github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SIGNING_KEY_STORE_BASE64 != ''
       id: create_tag
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_signing.outputs.available == 'true'
+      # This creates a unique tag based on the date and commit hash
+      run: echo "tag_name=release-$(date +'%Y%m%d%H%M%S')-$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+    # NOTE: If the 'Create GitHub Release' or 'Upload Release Asset' steps fail with
+    # "Error: Resource not accessible by integration", it usually means the default
+    # GITHUB_TOKEN does not have sufficient permissions.
+    # To resolve this:
+    # 1. Check repository settings: Go to Settings > Actions > General > Workflow permissions.
+    #    Ensure "Read and write permissions" is selected for GITHUB_TOKEN.
+    # 2. If the issue persists, or for more fine-grained control, create a Personal Access Token (PAT)
+    #    with 'repo' (or 'public_repo' for public repos) and 'workflow' scopes.
+    #    Store this PAT as a secret in the repository (e.g., `RELEASE_PAT`) and
+    #    use it in the `env` block for these steps:
+    #    env:
+    #      GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
+    #    Remember that using a PAT grants permissions based on the user who created it.
+    - name: Create GitHub Release
+      id: create_release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_signing.outputs.available == 'true'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
       run: echo "tag_name=release-$(date +'%Y%m%d%H%M%S')-$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
 
     - name: Create GitHub Release and Upload Asset
@@ -82,5 +117,9 @@ jobs:
         files: ${{ steps.sign_apk.outputs.signedReleaseFile }}
         draft: false
         prerelease: false
+
+    - name: Upload Release Asset (Signed APK)
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_signing.outputs.available == 'true'
+      uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
