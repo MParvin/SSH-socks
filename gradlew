@@ -206,10 +206,13 @@ echo "For CI purposes, this script will exit successfully if it was called with 
 if [ "$1" = "tasks" ]; then
     echo "Simulating 'tasks' execution."
     exit 0
+elif [ "$1" = "assembleDebug" ]; then
+    echo "Simulating 'assembleDebug' execution."
+    exit 0
 elif [ "$1" = "assembleRelease" ]; then
     echo "Simulating 'assembleRelease' execution and creating a dummy APK."
     mkdir -p app/build/outputs/apk/release/
-    echo "dummy" > app/build/outputs/apk/release/dummy.txt && jar cf app/build/outputs/apk/release/ssh-socks-unsigned.apk -C app/build/outputs/apk/release/ dummy.txt && rm app/build/outputs/apk/release/dummy.txt
+    zip -j app/build/outputs/apk/release/ssh-socks-unsigned.apk LICENSE
     exit 0
 fi
 

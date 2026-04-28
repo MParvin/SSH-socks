@@ -12,6 +12,10 @@ permissions:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
+    env:
+      BUILD_TOOLS_VERSION: '34.0.0'
+      ANDROID_HOME: '/usr/local/lib/android/sdk'
+      ANDROID_SDK_ROOT: '/usr/local/lib/android/sdk'
     permissions:
       contents: write
     steps:
@@ -24,6 +28,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
+
+    - name: Debug Android SDK
+      run: |
+        ls -d /usr/local/lib/android/sdk/build-tools/* || echo "No build-tools found"
 
     - name: Diagnostic - List Android Build Tools
       run: |
@@ -72,7 +80,6 @@ jobs:
     - name: Sign APK (if secrets are available)
       id: sign_apk
       uses: r0adkll/sign-android-release@v1
-      continue-on-error: true
       with:
         releaseDirectory: app/build/outputs/apk/release 
         signingKeyBase64: ${{ secrets.SIGNING_KEY_STORE_BASE64 }}
@@ -83,6 +90,12 @@ jobs:
     - name: Create Release Tag
       id: create_tag
       run: echo "tag_name=release-$(date +'%Y%m%d%H%M%S')-$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
 
     - name: Create GitHub Release and Upload Asset
       uses: softprops/action-gh-release@v2
@@ -96,3 +109,8 @@ jobs:
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_PAT }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ steps.sign_apk.outputs.signedReleaseFile }}
+        asset_name: ssh-socks.apk
+        asset_content_type: application/vnd.android.package-archive
