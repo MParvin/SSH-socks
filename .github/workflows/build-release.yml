@@ -22,6 +22,18 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
+    - name: Diagnostic - List Android Build Tools
+      run: |
+        echo "ANDROID_HOME: $ANDROID_HOME"
+        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
+        if [ -d "$ANDROID_HOME/build-tools" ]; then
+          ls -1 "$ANDROID_HOME/build-tools"
+        elif [ -d "$ANDROID_SDK_ROOT/build-tools" ]; then
+          ls -1 "$ANDROID_SDK_ROOT/build-tools"
+        else
+          echo "Build tools directory not found in common locations."
+        fi
+
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
 
@@ -43,15 +55,18 @@ jobs:
       id: create_tag
       run: echo "tag_name=release-$(date +'%Y%m%d%H%M%S')-$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
 
-    - name: Create GitHub Release
-      id: create_release
+    - name: Create GitHub Release and Upload Asset
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ steps.create_tag.outputs.tag_name }}
         name: Release ${{ steps.create_tag.outputs.tag_name }}
         body: |
           Automated release for commit ${{ github.sha }}.
+        files: |
+          ${{ steps.sign_apk.outputs.signedReleaseFile }}
         draft: false
         prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         files: |
           ${{ steps.sign_apk.outputs.signedReleaseFile != '' && steps.sign_apk.outputs.signedReleaseFile || 'app/build/outputs/apk/release/app-release-unsigned.apk' }}
