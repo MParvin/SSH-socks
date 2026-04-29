@@ -1,4 +1,4 @@
-package com.example.sshinjector.ui.profiles
+package me.mparvin.sshsocks.ui.profiles
 
 import android.app.Activity
 import android.content.Intent
@@ -14,9 +14,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
-import com.example.sshinjector.R
-import com.example.sshinjector.databinding.DialogAddEditProfileBinding
-import com.example.sshinjector.model.SSHProfile
+import me.mparvin.sshsocks.R
+import me.mparvin.sshsocks.databinding.DialogAddEditProfileBinding
+import me.mparvin.sshsocks.model.SSHProfile
 import java.io.BufferedReader
 import java.io.InputStreamReader
 

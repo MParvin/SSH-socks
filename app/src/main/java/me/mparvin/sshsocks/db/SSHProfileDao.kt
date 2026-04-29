@@ -1,4 +1,4 @@
-package com.example.sshinjector.db
+package me.mparvin.sshsocks.db
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
@@ -7,7 +7,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.example.sshinjector.model.SSHProfile
+import me.mparvin.sshsocks.model.SSHProfile
 
 @Dao
 interface SSHProfileDao {

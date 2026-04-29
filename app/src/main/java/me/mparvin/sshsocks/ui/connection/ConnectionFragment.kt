@@ -1,4 +1,4 @@
-package com.example.sshinjector.ui.connection
+package me.mparvin.sshsocks.ui.connection
 
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
@@ -12,10 +12,10 @@ import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
-import com.example.sshinjector.R
-import com.example.sshinjector.databinding.FragmentConnectionBinding
-import com.example.sshinjector.model.SSHProfile
-import com.example.sshinjector.ssh.SshStatus
+import me.mparvin.sshsocks.R
+import me.mparvin.sshsocks.databinding.FragmentConnectionBinding
+import me.mparvin.sshsocks.model.SSHProfile
+import me.mparvin.sshsocks.ssh.SshStatus
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

@@ -1,17 +1,17 @@
-package com.example.sshinjector.ui.connection
+package me.mparvin.sshsocks.ui.connection
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.sshinjector.db.AppDatabase
-import com.example.sshinjector.db.SSHProfileDao
-import com.example.sshinjector.model.SSHProfile
-import com.example.sshinjector.ssh.SshConnectionListener
-import com.example.sshinjector.ssh.SshConnectionManager
-import com.example.sshinjector.ssh.SshStatus
-import com.example.sshinjector.security.EncryptionHelper // For decrypting password/key
+import me.mparvin.sshsocks.db.AppDatabase
+import me.mparvin.sshsocks.db.SSHProfileDao
+import me.mparvin.sshsocks.model.SSHProfile
+import me.mparvin.sshsocks.ssh.SshConnectionListener
+import me.mparvin.sshsocks.ssh.SshConnectionManager
+import me.mparvin.sshsocks.ssh.SshStatus
+import me.mparvin.sshsocks.security.EncryptionHelper // For decrypting password/key
 import kotlinx.coroutines.launch
 import java.util.LinkedList // For logs
 

@@ -1,4 +1,4 @@
-package com.example.sshinjector.model
+package me.mparvin.sshsocks.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

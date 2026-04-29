@@ -1,4 +1,4 @@
-package com.example.sshinjector.ssh
+package me.mparvin.sshsocks.ssh
 
 interface SshConnectionListener {
     fun onLogOutput(log: String)

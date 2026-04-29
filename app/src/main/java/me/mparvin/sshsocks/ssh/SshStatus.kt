@@ -1,4 +1,4 @@
-package com.example.sshinjector.ssh
+package me.mparvin.sshsocks.ssh
 
 enum class SshStatus {
     DISCONNECTED,

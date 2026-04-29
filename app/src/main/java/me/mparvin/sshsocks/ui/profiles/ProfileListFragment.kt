@@ -1,4 +1,4 @@
-package com.example.sshinjector.ui.profiles
+package me.mparvin.sshsocks.ui.profiles
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,9 +11,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.sshinjector.R
-import com.example.sshinjector.databinding.FragmentProfileListBinding
-import com.example.sshinjector.model.SSHProfile
+import me.mparvin.sshsocks.R
+import me.mparvin.sshsocks.databinding.FragmentProfileListBinding
+import me.mparvin.sshsocks.model.SSHProfile
 
 class ProfileListFragment : Fragment() {
 

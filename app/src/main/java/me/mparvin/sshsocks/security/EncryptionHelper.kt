@@ -1,4 +1,4 @@
-package com.example.sshinjector.security
+package me.mparvin.sshsocks.security
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties

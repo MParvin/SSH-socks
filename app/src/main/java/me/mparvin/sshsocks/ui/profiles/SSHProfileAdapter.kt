@@ -1,4 +1,4 @@
-package com.example.sshinjector.ui.profiles
+package me.mparvin.sshsocks.ui.profiles
 
 import android.view.LayoutInflater
 import android.view.View
@@ -9,8 +9,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.sshinjector.R
-import com.example.sshinjector.model.SSHProfile
+import me.mparvin.sshsocks.R
+import me.mparvin.sshsocks.model.SSHProfile
 
 class SSHProfileAdapter(
     private val onProfileClick: (SSHProfile) -> Unit,

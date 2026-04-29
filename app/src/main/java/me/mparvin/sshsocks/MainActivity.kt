@@ -1,4 +1,4 @@
-package com.example.sshinjector
+package me.mparvin.sshsocks
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -6,7 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
-import com.example.sshinjector.databinding.ActivityMainBinding // Import ViewBinding class
+import me.mparvin.sshsocks.databinding.ActivityMainBinding // Import ViewBinding class
 
 class MainActivity : AppCompatActivity() {
 

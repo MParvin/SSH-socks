@@ -1,14 +1,14 @@
-package com.example.sshinjector.ui.profiles
+package me.mparvin.sshsocks.ui.profiles
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.sshinjector.db.AppDatabase
-import com.example.sshinjector.db.SSHProfileDao
-import com.example.sshinjector.model.SSHProfile
-import com.example.sshinjector.security.EncryptionHelper
+import me.mparvin.sshsocks.db.AppDatabase
+import me.mparvin.sshsocks.db.SSHProfileDao
+import me.mparvin.sshsocks.model.SSHProfile
+import me.mparvin.sshsocks.security.EncryptionHelper
 import kotlinx.coroutines.launch
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {

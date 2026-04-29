@@ -1,6 +1,6 @@
-package com.example.sshinjector.ssh
+package me.mparvin.sshsocks.ssh
 
-import com.example.sshinjector.model.SSHProfile
+import me.mparvin.sshsocks.model.SSHProfile
 import com.jcraft.jsch.JSch
 import com.jcraft.jsch.Session
 import com.jcraft.jsch.ChannelShell

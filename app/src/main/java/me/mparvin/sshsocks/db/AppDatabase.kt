@@ -1,10 +1,10 @@
-package com.example.sshinjector.db
+package me.mparvin.sshsocks.db
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.sshinjector.model.SSHProfile
+import me.mparvin.sshsocks.model.SSHProfile
 
 @Database(entities = [SSHProfile::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {

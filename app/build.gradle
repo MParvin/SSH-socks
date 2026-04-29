@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.sshinjector'
+    namespace 'me.mparvin.sshsocks'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.sshinjector"
+        applicationId "me.mparvin.sshsocks"
         minSdk 21
         targetSdk 33
         versionCode 1
