@@ -29,30 +29,11 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Debug Android SDK
-      run: |
-        ls -d /usr/local/lib/android/sdk/build-tools/* || echo "No build-tools found"
-
-    - name: Diagnostic - List Android Build Tools
-      run: |
-        echo "ANDROID_HOME: $ANDROID_HOME"
-        echo "ANDROID_SDK_ROOT: $ANDROID_SDK_ROOT"
-        if [ -d "$ANDROID_HOME/build-tools" ]; then
-          ls -1 "$ANDROID_HOME/build-tools"
-        elif [ -d "$ANDROID_SDK_ROOT/build-tools" ]; then
-          ls -1 "$ANDROID_SDK_ROOT/build-tools"
-        else
-          echo "Build tools directory not found in common locations."
-        fi
-
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
 
     - name: Build with Gradle
       run: ./gradlew assembleRelease
-
-    - name: List build directory
-      run: ls -R app/build/outputs/apk/release/
 
     # Check if signing secrets are available (secrets cannot be used directly in `if:` expressions)
     - name: Check signing secrets
@@ -79,10 +60,11 @@ jobs:
 
     - name: Create Release Tag
       id: create_tag
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_signing.outputs.available == 'true'
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       run: echo "tag_name=release-$(date +'%Y%m%d%H%M%S')-$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
 
-    - name: Create GitHub Release and Upload Asset
+    # Upload signed APK if signing secrets are available, otherwise upload unsigned APK
+    - name: Create GitHub Release and Upload Signed APK
       if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_signing.outputs.available == 'true'
       uses: softprops/action-gh-release@v2
       with:
@@ -91,5 +73,18 @@ jobs:
         body: |
           Automated release for commit ${{ github.sha }}.
         files: ${{ steps.sign_apk.outputs.signedReleaseFile }}
+        draft: false
+        prerelease: false
+
+    - name: Create GitHub Release and Upload Unsigned APK
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_signing.outputs.available == 'false'
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.create_tag.outputs.tag_name }}
+        name: Release ${{ steps.create_tag.outputs.tag_name }}
+        body: |
+          Automated release for commit ${{ github.sha }}.
+          Note: This APK is unsigned. Configure signing secrets for a signed release.
+        files: app/build/outputs/apk/release/app-release-unsigned.apk
         draft: false
         prerelease: false
