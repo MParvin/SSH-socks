@@ -64,7 +64,9 @@ jobs:
         name: Release ${{ github.ref_name }}
         body: |
           Automated release for commit ${{ github.sha }}.
-        files: ${{ steps.sign_apk.outputs.signedReleaseFile }}
+        files: |
+          ${{ steps.sign_apk.outputs.signedReleaseFile }}
+          app/build/outputs/apk/release/*.apk
         draft: false
         prerelease: false
 
@@ -77,6 +79,6 @@ jobs:
         body: |
           Automated release for commit ${{ github.sha }}.
           Note: This APK is unsigned. Configure signing secrets for a signed release.
-        files: app/build/outputs/apk/release/app-release-unsigned.apk
+        files: app/build/outputs/apk/release/*.apk
         draft: false
         prerelease: false
