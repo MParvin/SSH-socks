@@ -56,6 +56,17 @@ jobs:
         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
         keyPassword: ${{ secrets.KEY_PASSWORD }}
 
+    - name: Rename APK for release
+      run: |
+        VERSION="${{ github.ref_name }}"
+        mkdir -p release
+        if [ "${{ steps.check_signing.outputs.available }}" == "true" ]; then
+          cp "${{ steps.sign_apk.outputs.signedReleaseFile }}" "release/ssh-socks-apk-${VERSION}.apk"
+        else
+          APK=$(ls app/build/outputs/apk/release/*.apk | head -1)
+          cp "$APK" "release/ssh-socks-apk-${VERSION}.apk"
+        fi
+
     - name: Create GitHub Release and Upload Signed APK
       if: steps.check_signing.outputs.available == 'true'
       uses: softprops/action-gh-release@v2
@@ -64,9 +75,7 @@ jobs:
         name: Release ${{ github.ref_name }}
         body: |
           Automated release for commit ${{ github.sha }}.
-        files: |
-          ${{ steps.sign_apk.outputs.signedReleaseFile }}
-          app/build/outputs/apk/release/*.apk
+        files: release/ssh-socks-apk-${{ github.ref_name }}.apk
         draft: false
         prerelease: false
 
@@ -79,6 +88,6 @@ jobs:
         body: |
           Automated release for commit ${{ github.sha }}.
           Note: This APK is unsigned. Configure signing secrets for a signed release.
-        files: app/build/outputs/apk/release/*.apk
+        files: release/ssh-socks-apk-${{ github.ref_name }}.apk
         draft: false
         prerelease: false
