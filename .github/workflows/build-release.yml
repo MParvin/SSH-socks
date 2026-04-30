@@ -70,18 +70,44 @@ jobs:
         fi
         echo "Found APK: $APK ($(du -h "$APK" | cut -f1))"
 
+        # Generate debug keystore
         keytool -genkeypair -v -keystore debug.keystore -alias androiddebugkey \
           -keyalg RSA -keysize 2048 -validity 10000 \
           -dname "CN=Android Debug, O=Android, C=US" \
           -storepass android -keypass android -noprompt
 
-        BUILD_TOOLS=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)
-        mkdir -p release
-        "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" sign \
-          --ks debug.keystore --ks-key-alias androiddebugkey \
-          --ks-pass pass:android --key-pass pass:android \
-          --out "release/ssh-socks-apk-${{ github.ref_name }}.apk" \
-          "$APK"
+        # Find apksigner tool - try multiple possible locations
+        APKSIGNER=""
+        if [ -n "$ANDROID_HOME" ]; then
+          BUILD_TOOLS=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1 2>/dev/null || echo "")
+          if [ -n "$BUILD_TOOLS" ]; then
+            APKSIGNER="$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner"
+          fi
+        fi
+        
+        # Fallback to system apksigner if available
+        if [ ! -f "$APKSIGNER" ]; then
+          APKSIGNER=$(which apksigner 2>/dev/null || echo "")
+        fi
+        
+        if [ ! -f "$APKSIGNER" ] && [ ! -x "$APKSIGNER" ]; then
+          echo "ERROR: apksigner not found. Trying jarsigner as fallback..."
+          # Use jarsigner as last resort
+          jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
+            -keystore debug.keystore -storepass android \
+            "$APK" androiddebugkey
+          mkdir -p release
+          cp "$APK" "release/ssh-socks-apk-${{ github.ref_name }}.apk"
+        else
+          echo "Using apksigner: $APKSIGNER"
+          mkdir -p release
+          "$APKSIGNER" sign \
+            --ks debug.keystore --ks-key-alias androiddebugkey \
+            --ks-pass pass:android --key-pass pass:android \
+            --out "release/ssh-socks-apk-${{ github.ref_name }}.apk" \
+            "$APK"
+        fi
+        
         echo "Signed APK size: $(du -h "release/ssh-socks-apk-${{ github.ref_name }}.apk" | cut -f1)"
 
     - name: Rename production-signed APK for release
@@ -89,6 +115,17 @@ jobs:
       run: |
         mkdir -p release
         cp "${{ steps.sign_apk.outputs.signedReleaseFile }}" "release/ssh-socks-apk-${{ github.ref_name }}.apk"
+
+    - name: Verify APK exists for upload
+      run: |
+        APK_FILE="release/ssh-socks-apk-${{ github.ref_name }}.apk"
+        if [ ! -f "$APK_FILE" ]; then
+          echo "ERROR: APK file not found at $APK_FILE"
+          echo "Contents of release directory:"
+          ls -la release/ 2>/dev/null || echo "Release directory does not exist"
+          exit 1
+        fi
+        echo "✓ APK ready for upload: $APK_FILE ($(du -h "$APK_FILE" | cut -f1))"
 
     - name: Create GitHub Release and Upload APK
       uses: softprops/action-gh-release@v2
