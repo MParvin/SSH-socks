@@ -70,43 +70,24 @@ jobs:
         fi
         echo "Found APK: $APK ($(du -h "$APK" | cut -f1))"
 
-        # Generate debug keystore
-        keytool -genkeypair -v -keystore debug.keystore -alias androiddebugkey \
+        # Create debug keystore with simple parameters
+        keytool -genkeypair -keystore debug.keystore -alias androiddebugkey \
+          -keypass android -storepass android \
           -keyalg RSA -keysize 2048 -validity 10000 \
-          -dname "CN=Android Debug, O=Android, C=US" \
-          -storepass android -keypass android -noprompt
+          -dname "CN=Debug, OU=Debug, O=Debug, L=Debug, ST=Debug, C=US" \
+          -noprompt
 
-        # Find apksigner tool - try multiple possible locations
-        APKSIGNER=""
-        if [ -n "$ANDROID_HOME" ]; then
-          BUILD_TOOLS=$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1 2>/dev/null || echo "")
-          if [ -n "$BUILD_TOOLS" ]; then
-            APKSIGNER="$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner"
-          fi
-        fi
-        
-        # Fallback to system apksigner if available
-        if [ ! -f "$APKSIGNER" ]; then
-          APKSIGNER=$(which apksigner 2>/dev/null || echo "")
-        fi
-        
-        if [ ! -f "$APKSIGNER" ] && [ ! -x "$APKSIGNER" ]; then
-          echo "ERROR: apksigner not found. Trying jarsigner as fallback..."
-          # Use jarsigner as last resort
-          jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 \
-            -keystore debug.keystore -storepass android \
-            "$APK" androiddebugkey
-          mkdir -p release
-          cp "$APK" "release/ssh-socks-apk-${{ github.ref_name }}.apk"
-        else
-          echo "Using apksigner: $APKSIGNER"
-          mkdir -p release
-          "$APKSIGNER" sign \
-            --ks debug.keystore --ks-key-alias androiddebugkey \
-            --ks-pass pass:android --key-pass pass:android \
-            --out "release/ssh-socks-apk-${{ github.ref_name }}.apk" \
-            "$APK"
-        fi
+        # Create a copy to sign in-place
+        mkdir -p release
+        cp "$APK" "release/ssh-socks-apk-${{ github.ref_name }}.apk"
+
+        # Sign with jarsigner (more reliable in CI)
+        jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+          -keystore debug.keystore -storepass android -keypass android \
+          "release/ssh-socks-apk-${{ github.ref_name }}.apk" androiddebugkey
+
+        # Verify the signature
+        jarsigner -verify -verbose -certs "release/ssh-socks-apk-${{ github.ref_name }}.apk"
         
         echo "Signed APK size: $(du -h "release/ssh-socks-apk-${{ github.ref_name }}.apk" | cut -f1)"
 
