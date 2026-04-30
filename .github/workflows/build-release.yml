@@ -2,9 +2,8 @@ name: Android CI/CD Build and Release
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    tags:
+      - '*'
 
 permissions:
   contents: write
@@ -13,7 +12,6 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     env:
-      BUILD_TOOLS_VERSION: '34.0.0'
       ANDROID_HOME: '/usr/local/lib/android/sdk'
       ANDROID_SDK_ROOT: '/usr/local/lib/android/sdk'
     permissions:
@@ -49,7 +47,7 @@ jobs:
 
     - name: Sign APK
       id: sign_apk
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_signing.outputs.available == 'true'
+      if: steps.check_signing.outputs.available == 'true'
       uses: r0adkll/sign-android-release@v1
       with:
         releaseDirectory: app/build/outputs/apk/release
@@ -58,18 +56,12 @@ jobs:
         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
         keyPassword: ${{ secrets.KEY_PASSWORD }}
 
-    - name: Create Release Tag
-      id: create_tag
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: echo "tag_name=release-$(date +'%Y%m%d%H%M%S')-$(echo ${GITHUB_SHA} | cut -c1-7)" >> $GITHUB_OUTPUT
-
-    # Upload signed APK if signing secrets are available, otherwise upload unsigned APK
     - name: Create GitHub Release and Upload Signed APK
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_signing.outputs.available == 'true'
+      if: steps.check_signing.outputs.available == 'true'
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ steps.create_tag.outputs.tag_name }}
-        name: Release ${{ steps.create_tag.outputs.tag_name }}
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
         body: |
           Automated release for commit ${{ github.sha }}.
         files: ${{ steps.sign_apk.outputs.signedReleaseFile }}
@@ -77,11 +69,11 @@ jobs:
         prerelease: false
 
     - name: Create GitHub Release and Upload Unsigned APK
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_signing.outputs.available == 'false'
+      if: steps.check_signing.outputs.available == 'false'
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ steps.create_tag.outputs.tag_name }}
-        name: Release ${{ steps.create_tag.outputs.tag_name }}
+        tag_name: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
         body: |
           Automated release for commit ${{ github.sha }}.
           Note: This APK is unsigned. Configure signing secrets for a signed release.
