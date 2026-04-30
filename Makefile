@@ -12,14 +12,20 @@ build:
 	@echo "APK copied to $(APK_DEST)"
 
 push:
-	@LAST_TAG=$$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo ''); \
-	if [ -z "$$LAST_TAG" ]; then \
+	@REMOTE_TAG=$$(gh release list --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null || echo ''); \
+	LOCAL_TAG=$$(git tag --sort=-version:refname | head -1); \
+	if [ -z "$$REMOTE_TAG" ] && [ -z "$$LOCAL_TAG" ]; then \
 		NEW_TAG="v0.0.1"; \
 	else \
-		MAJOR=$$(echo "$$LAST_TAG" | cut -d. -f1); \
-		MINOR=$$(echo "$$LAST_TAG" | cut -d. -f2); \
-		PATCH=$$(echo "$$LAST_TAG" | cut -d. -f3); \
-		NEW_TAG="$$MAJOR.$$MINOR.$$((PATCH + 1))"; \
+		if [ -z "$$REMOTE_TAG" ]; then LAST_TAG="$$LOCAL_TAG"; \
+		elif [ -z "$$LOCAL_TAG" ]; then LAST_TAG="$$REMOTE_TAG"; \
+		else \
+			LAST_TAG=$$(printf '%s\n' "$$REMOTE_TAG" "$$LOCAL_TAG" | sort -V | tail -1); \
+		fi; \
+		MAJOR=$$(echo "$$LAST_TAG" | sed 's/^v//' | cut -d. -f1); \
+		MINOR=$$(echo "$$LAST_TAG" | sed 's/^v//' | cut -d. -f2); \
+		PATCH=$$(echo "$$LAST_TAG" | sed 's/^v//' | cut -d. -f3); \
+		NEW_TAG="v$$MAJOR.$$MINOR.$$((PATCH + 1))"; \
 	fi; \
 	echo "Creating tag $$NEW_TAG..."; \
 	git tag "$$NEW_TAG" && git push origin "$$NEW_TAG" && echo "Pushed tag $$NEW_TAG"
